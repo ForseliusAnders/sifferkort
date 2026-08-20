@@ -114,6 +114,42 @@
   .resultat { font-size: 17px; line-height: 1.6; background: #1c1f26; border: 1px solid #2a2e37; border-radius: 16px; padding: 16px; margin-bottom: 12px; }
   .resultat .stort { font-size: 28px; font-weight: 700; }
   .gron { color: #4fc47f; } .rod { color: #e06c6c; }
+  .rubrikrad { font-size: 13px; color: #8a8f98; letter-spacing: 0.06em; margin: 18px 0 8px; text-transform: uppercase; }
+  .valrad { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .valrad .etikett { font-size: 14px; color: #8a8f98; min-width: 92px; }
+  .val { display: flex; gap: 6px; flex-wrap: wrap; }
+  .val button {
+    min-width: 38px; padding: 8px 0; border-radius: 10px; cursor: pointer;
+    border: 1px solid #2a2e37; background: #14161b; color: #c8ccd4; font-size: 15px;
+  }
+  .val button.vald { background: #24304a; border-color: #4c8bf5; color: #fff; }
+  .statrad { font-size: 13px; color: #8a8f98; margin-top: 10px; }
+  .visaSerie {
+    font-size: clamp(40px, 13vw, 68px); font-weight: 800; text-align: center;
+    font-variant-numeric: tabular-nums; letter-spacing: 0.08em; padding: 40px 0 10px;
+    min-height: 140px; word-break: break-all;
+  }
+  .nedrakning { text-align: center; color: #f2c94c; font-size: 15px; min-height: 24px; margin-bottom: 20px; }
+  .svarsfalt {
+    display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;
+  }
+  .svarsfalt .ruta {
+    width: 44px; height: 58px; border-radius: 10px; background: #1c1f26;
+    border: 1px solid #2a2e37; display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums;
+  }
+  .svarsfalt .ruta.aktiv { border-color: #4c8bf5; }
+  .svarsfalt .ruta.ratt { border-color: #2e9e5b; color: #4fc47f; }
+  .svarsfalt .ruta.fel { border-color: #d64545; color: #e06c6c; }
+  .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .numpad button {
+    padding: 18px 0; font-size: 24px; border-radius: 14px; cursor: pointer;
+    border: 1px solid #2a2e37; background: #1c1f26; color: #f2f2f2;
+    font-variant-numeric: tabular-nums;
+  }
+  .numpad button:active { background: #2a2e37; }
+  .numpad .klar { background: #2e9e5b; border-color: #2e9e5b; }
+  .numpad .backa { background: #24262e; }
 </style>
 </head>
 <body>
@@ -147,6 +183,18 @@
 <div class="panel" id="seriePanel">
   <div class="inre">
     <h2>Sifferserier <button id="stangSerier">✕</button></h2>
+
+    <div class="serie">
+      <div class="namn" style="margin-bottom:10px">Slumpad serie</div>
+      <div class="valrad"><span class="etikett">Antal siffror</span>
+        <div class="val" id="valLangd"></div></div>
+      <div class="valrad"><span class="etikett">Visas i</span>
+        <div class="val" id="valTid"></div></div>
+      <button class="stor" id="startSlump">Starta</button>
+      <div class="statrad" id="slumpStat"></div>
+    </div>
+
+    <div class="rubrikrad">Sparade nummer</div>
     <div id="serieLista"></div>
     <input id="nyNamn" placeholder="Namn (t.ex. Mammas nummer)">
     <input id="nySiffror" placeholder="Siffror (t.ex. 0701234567)" inputmode="numeric">
@@ -168,6 +216,19 @@
     <input id="testSvar" placeholder="Skriv siffrorna ur minnet" inputmode="numeric" autocomplete="off">
     <button class="stor" id="rattaKnapp">Rätta</button>
     <div id="testResultat"></div>
+  </div>
+</div>
+
+<div class="panel" id="slumpPanel">
+  <div class="inre">
+    <h2 id="slumpRubrik">Minns serien <button id="stangSlump">✕</button></h2>
+    <div class="visaSerie" id="visaSerie"></div>
+    <div class="nedrakning" id="nedrakning"></div>
+    <div id="svarsyta" style="display:none">
+      <div class="svarsfalt" id="svarsfalt"></div>
+      <div class="numpad" id="numpad"></div>
+    </div>
+    <div id="slumpResultat"></div>
   </div>
 </div>
 
@@ -350,6 +411,8 @@
   }
   document.getElementById('serierKnapp').addEventListener('click', () => {
     ritaSerier();
+    ritaVal();
+    ritaNumpad();
     document.getElementById('seriePanel').classList.add('oppen');
   });
   document.getElementById('stangSerier').addEventListener('click', () =>
@@ -362,6 +425,128 @@
     document.getElementById('nyNamn').value = '';
     document.getElementById('nySiffror').value = '';
     ritaSerier();
+  });
+
+  // --- Slumpad sifferserie: valj langd + visningstid, memorera, mata in.
+  let slumpLangd = parseInt(localStorage.getItem('sifferkort.slumpLangd') || '4', 10);
+  let slumpTid = parseInt(localStorage.getItem('sifferkort.slumpTid') || '3', 10);
+  let facit = '', svarat = '', nedTimer = null;
+
+  function ritaVal() {
+    const l = document.getElementById('valLangd');
+    const t = document.getElementById('valTid');
+    l.innerHTML = ''; t.innerHTML = '';
+    for (let i = 3; i <= 8; i++) {
+      const b = document.createElement('button');
+      b.textContent = i;
+      if (i === slumpLangd) b.classList.add('vald');
+      b.addEventListener('click', () => {
+        slumpLangd = i; localStorage.setItem('sifferkort.slumpLangd', i); ritaVal();
+      });
+      l.appendChild(b);
+    }
+    for (let i = 1; i <= 5; i++) {
+      const b = document.createElement('button');
+      b.textContent = i + 's';
+      if (i === slumpTid) b.classList.add('vald');
+      b.addEventListener('click', () => {
+        slumpTid = i; localStorage.setItem('sifferkort.slumpTid', i); ritaVal();
+      });
+      t.appendChild(b);
+    }
+    const s = slumpStatistik();
+    document.getElementById('slumpStat').textContent = s.antal
+      ? `${s.antal} försök · ${s.ratt} helt rätt · bästa: ${s.basta} siffror`
+      : 'Inga försök än';
+  }
+
+  function slumpStatistik() {
+    try { return JSON.parse(localStorage.getItem('sifferkort.slumpStat')) || { antal: 0, ratt: 0, basta: 0 }; }
+    catch { return { antal: 0, ratt: 0, basta: 0 }; }
+  }
+  function sparaSlumpStat(langd, allt) {
+    const s = slumpStatistik();
+    s.antal += 1;
+    if (allt) { s.ratt += 1; s.basta = Math.max(s.basta, langd); }
+    localStorage.setItem('sifferkort.slumpStat', JSON.stringify(s));
+  }
+
+  function startaSlump() {
+    facit = '';
+    for (let i = 0; i < slumpLangd; i++) facit += Math.floor(Math.random() * 10);
+    svarat = '';
+    document.getElementById('seriePanel').classList.remove('oppen');
+    document.getElementById('slumpPanel').classList.add('oppen');
+    document.getElementById('svarsyta').style.display = 'none';
+    document.getElementById('slumpResultat').innerHTML = '';
+    const visa = document.getElementById('visaSerie');
+    const ned = document.getElementById('nedrakning');
+    visa.textContent = delaUpp(facit).join(' ');
+    let kvar = slumpTid;
+    ned.textContent = kvar + ' s';
+    clearInterval(nedTimer);
+    nedTimer = setInterval(() => {
+      kvar -= 1;
+      if (kvar > 0) { ned.textContent = kvar + ' s'; return; }
+      clearInterval(nedTimer);
+      visa.textContent = '';
+      ned.textContent = 'Vad var siffrorna?';
+      document.getElementById('svarsyta').style.display = 'block';
+      ritaSvarsfalt();
+    }, 1000);
+  }
+
+  function ritaSvarsfalt(facitlage) {
+    const falt = document.getElementById('svarsfalt');
+    falt.innerHTML = '';
+    for (let i = 0; i < facit.length; i++) {
+      const d = document.createElement('div');
+      d.className = 'ruta';
+      d.textContent = svarat[i] || '';
+      if (facitlage) d.classList.add(svarat[i] === facit[i] ? 'ratt' : 'fel');
+      else if (i === svarat.length) d.classList.add('aktiv');
+      falt.appendChild(d);
+    }
+  }
+
+  function ritaNumpad() {
+    const pad = document.getElementById('numpad');
+    pad.innerHTML = '';
+    ['1','2','3','4','5','6','7','8','9','⌫','0','✓'].forEach((t) => {
+      const b = document.createElement('button');
+      b.textContent = t;
+      if (t === '⌫') b.className = 'backa';
+      if (t === '✓') b.className = 'klar';
+      b.addEventListener('click', () => {
+        if (t === '⌫') svarat = svarat.slice(0, -1);
+        else if (t === '✓') return rattaSlump();
+        else if (svarat.length < facit.length) svarat += t;
+        ritaSvarsfalt();
+        if (svarat.length === facit.length) rattaSlump();
+      });
+      pad.appendChild(b);
+    });
+  }
+
+  function rattaSlump() {
+    if (!facit) return;
+    const allt = svarat === facit;
+    sparaSlumpStat(facit.length, allt);
+    ritaSvarsfalt(true);
+    let ratta = 0;
+    for (let i = 0; i < facit.length; i++) if (svarat[i] === facit[i]) ratta++;
+    document.getElementById('slumpResultat').innerHTML =
+      '<div class="resultat"><span class="stort ' + (allt ? 'gron">Allt rätt! ✓' : 'rod">' + ratta + '/' + facit.length) +
+      '</span><br>Rätt svar: ' + delaUpp(facit).join(' ') + '</div>' +
+      '<button class="stor" id="igen">En till</button>';
+    document.getElementById('igen').addEventListener('click', startaSlump);
+    facit = facit; // behall for visning
+  }
+
+  document.getElementById('startSlump').addEventListener('click', startaSlump);
+  document.getElementById('stangSlump').addEventListener('click', () => {
+    clearInterval(nedTimer);
+    document.getElementById('slumpPanel').classList.remove('oppen');
   });
 
   let aktivSerie = null;
