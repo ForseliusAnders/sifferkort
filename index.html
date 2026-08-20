@@ -150,6 +150,15 @@
   .numpad button:active { background: #2a2e37; }
   .numpad .klar { background: #2e9e5b; border-color: #2e9e5b; }
   .numpad .backa { background: #24262e; }
+  .bildkedja { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .bildkedja .lank { text-align: center; }
+  .bildkedja img {
+    width: 96px; height: 96px; object-fit: contain; background: #fff;
+    border-radius: 12px; display: block;
+  }
+  .bildkedja .lanknr { font-size: 15px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .bildkedja .lanknamn { font-size: 11px; color: #8a8f98; max-width: 96px; }
+  .bildkedja.dolj .lanknr, .bildkedja.dolj .lanknamn { visibility: hidden; }
 </style>
 </head>
 <body>
@@ -190,6 +199,10 @@
         <div class="val" id="valLangd"></div></div>
       <div class="valrad"><span class="etikett">Visas i</span>
         <div class="val" id="valTid"></div></div>
+      <div class="valrad"><span class="etikett">Visa som</span>
+        <div class="val" id="valForm"></div></div>
+      <div class="valrad"><span class="etikett">Paus före svar</span>
+        <div class="val" id="valPaus"></div></div>
       <button class="stor" id="startSlump">Starta</button>
       <div class="statrad" id="slumpStat"></div>
     </div>
@@ -223,7 +236,9 @@
   <div class="inre">
     <h2 id="slumpRubrik">Minns serien <button id="stangSlump">✕</button></h2>
     <div class="visaSerie" id="visaSerie"></div>
+    <div class="bildkedja" id="bildkedja"></div>
     <div class="nedrakning" id="nedrakning"></div>
+    <button class="stor" id="klarMemo" style="display:none">Klar — dölj</button>
     <div id="svarsyta" style="display:none">
       <div class="svarsfalt" id="svarsfalt"></div>
       <div class="numpad" id="numpad"></div>
@@ -428,32 +443,35 @@
   });
 
   // --- Slumpad sifferserie: valj langd + visningstid, memorera, mata in.
-  let slumpLangd = parseInt(localStorage.getItem('sifferkort.slumpLangd') || '4', 10);
-  let slumpTid = parseInt(localStorage.getItem('sifferkort.slumpTid') || '3', 10);
-  let facit = '', svarat = '', nedTimer = null;
+  let slumpLangd = parseInt(localStorage.getItem('sifferkort.slumpLangd') || '6', 10);
+  let slumpTid = localStorage.getItem('sifferkort.slumpTid') || 'egen';
+  let slumpForm = localStorage.getItem('sifferkort.slumpForm') || 'siffror';
+  let slumpPaus = parseInt(localStorage.getItem('sifferkort.slumpPaus') || '5', 10);
+  let facit = '', svarat = '', nedTimer = null, memoStart = 0, memoTid = 0;
+
+  function valgrupp(el, varden, aktivt, etikett, spara) {
+    el.innerHTML = '';
+    varden.forEach((v) => {
+      const b = document.createElement('button');
+      b.textContent = etikett(v);
+      if (v === aktivt) b.classList.add('vald');
+      b.addEventListener('click', () => { spara(v); ritaVal(); });
+      el.appendChild(b);
+    });
+  }
 
   function ritaVal() {
-    const l = document.getElementById('valLangd');
-    const t = document.getElementById('valTid');
-    l.innerHTML = ''; t.innerHTML = '';
-    for (let i = 3; i <= 8; i++) {
-      const b = document.createElement('button');
-      b.textContent = i;
-      if (i === slumpLangd) b.classList.add('vald');
-      b.addEventListener('click', () => {
-        slumpLangd = i; localStorage.setItem('sifferkort.slumpLangd', i); ritaVal();
-      });
-      l.appendChild(b);
-    }
-    for (let i = 1; i <= 5; i++) {
-      const b = document.createElement('button');
-      b.textContent = i + 's';
-      if (i === slumpTid) b.classList.add('vald');
-      b.addEventListener('click', () => {
-        slumpTid = i; localStorage.setItem('sifferkort.slumpTid', i); ritaVal();
-      });
-      t.appendChild(b);
-    }
+    valgrupp(document.getElementById('valLangd'), [2, 4, 6, 8, 10, 12], slumpLangd,
+      (v) => v, (v) => { slumpLangd = v; localStorage.setItem('sifferkort.slumpLangd', v); });
+    valgrupp(document.getElementById('valTid'), ['egen', 3, 5, 10, 20], slumpTid,
+      (v) => v === 'egen' ? 'egen takt' : v + 's',
+      (v) => { slumpTid = v; localStorage.setItem('sifferkort.slumpTid', v); });
+    valgrupp(document.getElementById('valForm'), ['siffror', 'bilder'], slumpForm,
+      (v) => v === 'siffror' ? 'Siffror' : 'Bilder',
+      (v) => { slumpForm = v; localStorage.setItem('sifferkort.slumpForm', v); });
+    valgrupp(document.getElementById('valPaus'), [0, 5, 10, 20], slumpPaus,
+      (v) => v === 0 ? 'ingen' : v + 's',
+      (v) => { slumpPaus = v; localStorage.setItem('sifferkort.slumpPaus', v); });
     const s = slumpStatistik();
     document.getElementById('slumpStat').textContent = s.antal
       ? `${s.antal} försök · ${s.ratt} helt rätt · bästa: ${s.basta} siffror`
@@ -471,29 +489,89 @@
     localStorage.setItem('sifferkort.slumpStat', JSON.stringify(s));
   }
 
+  function ritaKedja(dolj) {
+    const kedja = document.getElementById('bildkedja');
+    kedja.innerHTML = '';
+    kedja.classList.toggle('dolj', !!dolj);
+    delaUpp(facit).forEach((par) => {
+      const n = parseInt(par, 10);
+      const kort = KORT.find((k) => k.n === n);
+      const d = document.createElement('div');
+      d.className = 'lank';
+      d.innerHTML = '<img alt=""><div class="lanknr"></div><div class="lanknamn"></div>';
+      d.querySelector('img').src = bildvag(n);
+      d.querySelector('.lanknr').textContent = par;
+      d.querySelector('.lanknamn').textContent = kort ? (favorit(n) || kort.namn) : '';
+      kedja.appendChild(d);
+    });
+  }
+
   function startaSlump() {
     facit = '';
     for (let i = 0; i < slumpLangd; i++) facit += Math.floor(Math.random() * 10);
     svarat = '';
+    memoTid = 0;
+    memoStart = Date.now();
     document.getElementById('seriePanel').classList.remove('oppen');
     document.getElementById('slumpPanel').classList.add('oppen');
     document.getElementById('svarsyta').style.display = 'none';
     document.getElementById('slumpResultat').innerHTML = '';
     const visa = document.getElementById('visaSerie');
     const ned = document.getElementById('nedrakning');
-    visa.textContent = delaUpp(facit).join(' ');
-    let kvar = slumpTid;
-    ned.textContent = kvar + ' s';
+    const klarKnapp = document.getElementById('klarMemo');
     clearInterval(nedTimer);
-    nedTimer = setInterval(() => {
-      kvar -= 1;
-      if (kvar > 0) { ned.textContent = kvar + ' s'; return; }
-      clearInterval(nedTimer);
+
+    if (slumpForm === 'bilder') {
+      // Bild -> siffra: kedjan visas, siffrorna doljs. Tranar avkodningen.
       visa.textContent = '';
-      ned.textContent = 'Vad var siffrorna?';
+      ritaKedja(true);
+      document.getElementById('bildkedja').style.display = 'flex';
+    } else {
+      // Siffra -> bild: du bygger scenen sjalv medan siffrorna star framme.
+      visa.textContent = delaUpp(facit).join(' ');
+      document.getElementById('bildkedja').style.display = 'none';
+    }
+
+    function doljOchFraga() {
+      memoTid = Math.round((Date.now() - memoStart) / 1000);
+      visa.textContent = '';
+      document.getElementById('bildkedja').style.display = 'none';
+      klarKnapp.style.display = 'none';
+      if (slumpPaus > 0) {
+        let paus = slumpPaus;
+        ned.textContent = 'Paus … ' + paus + ' s';
+        nedTimer = setInterval(() => {
+          paus -= 1;
+          if (paus > 0) { ned.textContent = 'Paus … ' + paus + ' s'; return; }
+          clearInterval(nedTimer);
+          fragaSvar();
+        }, 1000);
+      } else {
+        fragaSvar();
+      }
+    }
+
+    function fragaSvar() {
+      ned.textContent = 'Vilka siffror var det?';
       document.getElementById('svarsyta').style.display = 'block';
       ritaSvarsfalt();
-    }, 1000);
+    }
+
+    if (slumpTid === 'egen') {
+      ned.textContent = 'Bygg din scen — tryck när du är klar';
+      klarKnapp.style.display = 'block';
+      klarKnapp.onclick = doljOchFraga;
+    } else {
+      klarKnapp.style.display = 'none';
+      let kvar = slumpTid;
+      ned.textContent = kvar + ' s';
+      nedTimer = setInterval(() => {
+        kvar -= 1;
+        if (kvar > 0) { ned.textContent = kvar + ' s'; return; }
+        clearInterval(nedTimer);
+        doljOchFraga();
+      }, 1000);
+    }
   }
 
   function ritaSvarsfalt(facitlage) {
@@ -537,10 +615,14 @@
     for (let i = 0; i < facit.length; i++) if (svarat[i] === facit[i]) ratta++;
     document.getElementById('slumpResultat').innerHTML =
       '<div class="resultat"><span class="stort ' + (allt ? 'gron">Allt rätt! ✓' : 'rod">' + ratta + '/' + facit.length) +
-      '</span><br>Rätt svar: ' + delaUpp(facit).join(' ') + '</div>' +
+      '</span><br>Rätt svar: ' + delaUpp(facit).join(' ') +
+      (memoTid ? '<br>Memorering: ' + memoTid + ' s' : '') + '</div>' +
       '<button class="stor" id="igen">En till</button>';
     document.getElementById('igen').addEventListener('click', startaSlump);
-    facit = facit; // behall for visning
+    // Facit som bildkedja: jamfor med scenen du byggde.
+    document.getElementById('bildkedja').style.display = 'flex';
+    ritaKedja(false);
+    document.getElementById('nedrakning').textContent = 'Din kedja:';
   }
 
   document.getElementById('startSlump').addEventListener('click', startaSlump);

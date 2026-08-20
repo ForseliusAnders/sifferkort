@@ -1,5 +1,5 @@
 // Natverk forst for kod (sa uppdateringar nar fram), cache forst for bilder.
-const CACHE = 'sifferkort-v3';
+const CACHE = 'sifferkort-v4';
 
 self.addEventListener('install', (e) => {
   self.skipWaiting();
