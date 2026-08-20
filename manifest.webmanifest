@@ -1,0 +1,12 @@
+{
+  "name": "Sifferkort",
+  "short_name": "Sifferkort",
+  "description": "Minnesbilder for talen 0-99",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#111318",
+  "theme_color": "#111318",
+  "icons": [
+    { "src": "bilder/07.png", "sizes": "any", "type": "image/png" }
+  ]
+}

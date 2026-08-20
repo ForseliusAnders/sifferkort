@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#111318">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="bilder/07.png">
+<title>Sifferkort</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overscroll-behavior: none; }
+  body {
+    background: #111318; color: #f2f2f2;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    padding: max(env(safe-area-inset-top), 16px) 16px max(env(safe-area-inset-bottom), 16px);
+    user-select: none; -webkit-user-select: none; touch-action: pan-y;
+  }
+  header {
+    width: 100%; max-width: 480px; display: flex;
+    justify-content: space-between; align-items: center; padding: 4px 4px 12px;
+  }
+  header .titel { font-size: 15px; font-weight: 600; letter-spacing: 0.06em; color: #8a8f98; }
+  header .lage { font-size: 13px; color: #8a8f98; }
+  .scen { width: 100%; max-width: 480px; flex: 1; display: flex; flex-direction: column; perspective: 1200px; }
+  .kort {
+    position: relative; flex: 1; min-height: 340px; cursor: pointer;
+    transform-style: preserve-3d; transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .kort.vand { transform: rotateY(180deg); }
+  .sida {
+    position: absolute; inset: 0; border-radius: 24px; overflow: hidden;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    display: flex; align-items: center; justify-content: center;
+    background: #1c1f26; border: 1px solid #2a2e37;
+  }
+  .fram .nummer {
+    font-size: clamp(96px, 40vw, 200px); font-weight: 800;
+    font-variant-numeric: tabular-nums; color: #f2f2f2;
+  }
+  .bak { transform: rotateY(180deg); background: #fff; }
+  .bak img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
+  .bak .saknas { color: #666; font-size: 15px; text-align: center; padding: 24px; }
+  .bak .bildnamn {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 16px 12px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.55));
+    color: #fff; font-size: 17px; font-weight: 600; text-align: center;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  }
+  .alternativ {
+    min-height: 64px; display: flex; gap: 8px; justify-content: center;
+    align-items: center; padding: 12px 0 4px; flex-wrap: wrap;
+  }
+  .alternativ button {
+    border: 1px solid #2a2e37; background: #1c1f26; color: #c8ccd4;
+    border-radius: 999px; padding: 8px 16px; font-size: 14px; cursor: pointer;
+  }
+  .alternativ button.vald { border-color: #4c8bf5; color: #fff; background: #24304a; }
+  nav {
+    width: 100%; max-width: 480px; display: flex; gap: 10px; padding-top: 10px;
+  }
+  nav button {
+    flex: 1; border: none; border-radius: 16px; background: #1c1f26;
+    border: 1px solid #2a2e37; color: #f2f2f2; font-size: 22px;
+    padding: 14px 0; cursor: pointer;
+  }
+  nav button:active { background: #2a2e37; }
+</style>
+</head>
+<body>
+<header>
+  <div class="titel">SIFFERKORT</div>
+  <div class="lage" id="lage">ordning</div>
+</header>
+<div class="scen">
+  <div class="kort" id="kort">
+    <div class="sida fram"><div class="nummer" id="nummer">0</div></div>
+    <div class="sida bak" id="bak"></div>
+  </div>
+  <div class="alternativ" id="alternativ"></div>
+</div>
+<nav>
+  <button id="forra" aria-label="Föregående">←</button>
+  <button id="slumpa" aria-label="Slumpa">🎲</button>
+  <button id="nasta" aria-label="Nästa">→</button>
+</nav>
+<script src="kort.js"></script>
+<script>
+  const kortEl = document.getElementById('kort');
+  const nummerEl = document.getElementById('nummer');
+  const bakEl = document.getElementById('bak');
+  const altEl = document.getElementById('alternativ');
+  const lageEl = document.getElementById('lage');
+
+  let index = parseInt(localStorage.getItem('sifferkort.index') || '0', 10);
+  let slumpLage = false;
+
+  function favorit(n) { return localStorage.getItem('sifferkort.fav.' + n); }
+  function sattFavorit(n, namn) {
+    if (namn === null) localStorage.removeItem('sifferkort.fav.' + n);
+    else localStorage.setItem('sifferkort.fav.' + n, namn);
+  }
+
+  function visa(i, { vand = false } = {}) {
+    // Vid kortbyte: hoppa till ratt sida UTAN animation, annars skymtar
+    // nya baksidan medan kortet snurrar tillbaka.
+    kortEl.style.transition = 'none';
+    kortEl.classList.toggle('vand', vand);
+    void kortEl.offsetWidth;
+    kortEl.style.transition = '';
+    index = ((i % KORT.length) + KORT.length) % KORT.length;
+    // Forladda grannkortens bilder sa baksidan aldrig visas halvladdad.
+    [index + 1, index - 1].forEach((j) => {
+      const g = KORT[((j % KORT.length) + KORT.length) % KORT.length];
+      new Image().src = 'bilder/' + String(g.n).padStart(2, '0') + '.png';
+    });
+    localStorage.setItem('sifferkort.index', index);
+    const kort = KORT[index];
+    nummerEl.textContent = kort.n;
+    const fil = 'bilder/' + String(kort.n).padStart(2, '0') + '.png';
+    const visat = favorit(kort.n) || kort.namn;
+    bakEl.innerHTML = '';
+    const img = new Image();
+    img.src = fil;
+    img.alt = visat;
+    img.onerror = () => {
+      bakEl.innerHTML = '<div class="saknas">Bild saknas för ' + kort.n + '</div>';
+    };
+    bakEl.appendChild(img);
+    const namnEl = document.createElement('div');
+    namnEl.className = 'bildnamn';
+    namnEl.textContent = visat;
+    bakEl.appendChild(namnEl);
+    altEl.innerHTML = '';
+    const val = [kort.namn, ...(kort.alt || [])];
+    if (val.length > 1) {
+      val.forEach((namn) => {
+        const b = document.createElement('button');
+        b.textContent = namn;
+        const aktiv = (favorit(kort.n) || kort.namn) === namn;
+        if (aktiv) b.classList.add('vald');
+        b.addEventListener('click', (e) => {
+          e.stopPropagation();
+          sattFavorit(kort.n, namn === kort.namn ? null : namn);
+          visa(index, { vand: kortEl.classList.contains('vand') });
+        });
+        altEl.appendChild(b);
+      });
+    }
+  }
+
+  function nasta() { visa(slumpLage ? slump() : index + 1); }
+  function forra() { visa(slumpLage ? slump() : index - 1); }
+  function slump() {
+    let i;
+    do { i = Math.floor(Math.random() * KORT.length); } while (i === index);
+    return i;
+  }
+
+  // Tryckrytm: framsida -> vand till bilden; baksida -> nasta kort.
+  kortEl.addEventListener('click', () => {
+    if (kortEl.classList.contains('vand')) nasta();
+    else kortEl.classList.add('vand');
+  });
+  document.getElementById('nasta').addEventListener('click', nasta);
+  document.getElementById('forra').addEventListener('click', forra);
+  document.getElementById('slumpa').addEventListener('click', () => {
+    slumpLage = !slumpLage;
+    lageEl.textContent = slumpLage ? 'slump' : 'ordning';
+    if (slumpLage) visa(slump());
+  });
+
+  let startX = null, startY = null;
+  document.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchend', (e) => {
+    if (startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    startX = null;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0) nasta(); else forra();
+    }
+  }, { passive: true });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') nasta();
+    else if (e.key === 'ArrowLeft') forra();
+    else if (e.key === ' ' || e.key === 'Enter') kortEl.classList.toggle('vand');
+  });
+
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+  visa(index);
+</script>
+</body>
+</html>
