@@ -4,7 +4,4 @@ generera_ref.py
 associationer.md
 .claude/
 bilder/*.prompt.json
-# Riktiga foton (platshallare tills cartoonversioner finns)
-bilder/84.png
-bilder/85.png
-bilder/89.png
+att_generera.py
