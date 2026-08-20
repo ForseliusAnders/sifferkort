@@ -21,10 +21,14 @@
   }
   header {
     width: 100%; max-width: 480px; display: flex;
-    justify-content: space-between; align-items: center; padding: 4px 4px 12px;
+    justify-content: space-between; align-items: center; padding: 4px 4px 12px; gap: 10px;
   }
   header .titel { font-size: 15px; font-weight: 600; letter-spacing: 0.06em; color: #8a8f98; }
-  header .lage { font-size: 13px; color: #8a8f98; }
+  header .hoger { display: flex; gap: 12px; align-items: center; }
+  header button {
+    background: none; border: none; color: #8a8f98; font-size: 14px; cursor: pointer; padding: 4px;
+  }
+  header .klocka.igang { color: #f2c94c; font-variant-numeric: tabular-nums; }
   .scen { width: 100%; max-width: 480px; flex: 1; display: flex; flex-direction: column; perspective: 1200px; }
   .kort {
     position: relative; flex: 1; min-height: 340px; cursor: pointer;
@@ -41,44 +45,96 @@
     font-size: clamp(96px, 40vw, 200px); font-weight: 800;
     font-variant-numeric: tabular-nums; color: #f2f2f2;
   }
-  .bak { transform: rotateY(180deg); background: #fff; }
-  .bak img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
-  .bak .saknas { color: #666; font-size: 15px; text-align: center; padding: 24px; }
+  .bak { transform: rotateY(180deg); background: #fff; flex-direction: column; }
+  .bak .bildyta { position: relative; flex: 1; width: 100%; }
+  .bak .bildyta img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #fff; }
+  .bak .saknas { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #666; font-size: 15px; }
   .bak .bildnamn {
     position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 16px 12px;
     background: linear-gradient(transparent, rgba(0,0,0,0.55));
     color: #fff; font-size: 17px; font-weight: 600; text-align: center;
     text-shadow: 0 1px 3px rgba(0,0,0,0.6);
   }
+  .facit { display: flex; height: 84px; width: 100%; flex-shrink: 0; }
+  .facit button { flex: 1; border: none; font-size: 34px; cursor: pointer; color: #fff; }
+  .facit .fel { background: #d64545; }
+  .facit .ratt { background: #2e9e5b; }
+  .facit button:active { filter: brightness(1.15); }
   .alternativ {
-    min-height: 64px; display: flex; gap: 8px; justify-content: center;
-    align-items: center; padding: 12px 0 4px; flex-wrap: wrap;
+    min-height: 56px; display: flex; gap: 8px; justify-content: center;
+    align-items: center; padding: 10px 0 2px; flex-wrap: wrap;
   }
   .alternativ button {
     border: 1px solid #2a2e37; background: #1c1f26; color: #c8ccd4;
     border-radius: 999px; padding: 8px 16px; font-size: 14px; cursor: pointer;
   }
   .alternativ button.vald { border-color: #4c8bf5; color: #fff; background: #24304a; }
-  nav {
-    width: 100%; max-width: 480px; display: flex; gap: 10px; padding-top: 10px;
-  }
+  nav { width: 100%; max-width: 480px; display: flex; gap: 10px; padding-top: 8px; }
   nav button {
-    flex: 1; border: none; border-radius: 16px; background: #1c1f26;
+    flex: 1; border-radius: 16px; background: #1c1f26;
     border: 1px solid #2a2e37; color: #f2f2f2; font-size: 22px;
     padding: 14px 0; cursor: pointer;
   }
   nav button:active { background: #2a2e37; }
+  .panel {
+    position: fixed; inset: 0; background: #0a0b0e; z-index: 10;
+    display: none; flex-direction: column; align-items: center; overflow-y: auto;
+    padding: max(env(safe-area-inset-top), 20px) 16px 40px;
+  }
+  .panel.oppen { display: flex; }
+  .panel .inre { width: 100%; max-width: 480px; }
+  .panel h2 { font-size: 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+  .panel h2 button { background: none; border: none; color: #8a8f98; font-size: 24px; cursor: pointer; }
+  .serie {
+    background: #1c1f26; border: 1px solid #2a2e37; border-radius: 16px;
+    padding: 14px; margin-bottom: 12px;
+  }
+  .serie .rad { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .serie .namn { font-weight: 600; font-size: 16px; }
+  .serie .siffror { color: #8a8f98; font-variant-numeric: tabular-nums; letter-spacing: 0.1em; font-size: 14px; margin-top: 2px; }
+  .serie .knappar { display: flex; gap: 8px; }
+  .serie .knappar button, .panel .stor {
+    border: 1px solid #2a2e37; background: #24304a; color: #fff; border-radius: 10px;
+    padding: 8px 14px; font-size: 14px; cursor: pointer;
+  }
+  .serie .knappar .tabort { background: #3a1f1f; border-color: #5a2e2e; }
+  .panel .stor { width: 100%; padding: 14px; font-size: 16px; margin-top: 4px; }
+  .panel input {
+    width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #2a2e37;
+    background: #14161b; color: #fff; font-size: 17px; margin-bottom: 10px;
+  }
+  .parlista { display: flex; flex-direction: column; gap: 10px; }
+  .par {
+    display: flex; align-items: center; gap: 12px; background: #1c1f26;
+    border: 1px solid #2a2e37; border-radius: 14px; padding: 8px;
+  }
+  .par img { width: 84px; height: 84px; object-fit: contain; background: #fff; border-radius: 10px; }
+  .par .parnr { font-size: 30px; font-weight: 800; min-width: 56px; text-align: center; font-variant-numeric: tabular-nums; }
+  .par .parnamn { font-size: 15px; color: #c8ccd4; }
+  .resultat { font-size: 17px; line-height: 1.6; background: #1c1f26; border: 1px solid #2a2e37; border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+  .resultat .stort { font-size: 28px; font-weight: 700; }
+  .gron { color: #4fc47f; } .rod { color: #e06c6c; }
 </style>
 </head>
 <body>
 <header>
   <div class="titel">SIFFERKORT</div>
-  <div class="lage" id="lage">ordning</div>
+  <div class="hoger">
+    <button id="serierKnapp" aria-label="Sifferserier">123…</button>
+    <button id="klocka" class="klocka" aria-label="Tidtagning">⏱</button>
+    <button id="lage">ordning</button>
+  </div>
 </header>
 <div class="scen">
   <div class="kort" id="kort">
     <div class="sida fram"><div class="nummer" id="nummer">0</div></div>
-    <div class="sida bak" id="bak"></div>
+    <div class="sida bak">
+      <div class="bildyta" id="bildyta"></div>
+      <div class="facit">
+        <button class="fel" id="fel" aria-label="Kunde inte">✕</button>
+        <button class="ratt" id="ratt" aria-label="Kunde">✓</button>
+      </div>
+    </div>
   </div>
   <div class="alternativ" id="alternativ"></div>
 </div>
@@ -87,13 +143,49 @@
   <button id="slumpa" aria-label="Slumpa">🎲</button>
   <button id="nasta" aria-label="Nästa">→</button>
 </nav>
+
+<div class="panel" id="seriePanel">
+  <div class="inre">
+    <h2>Sifferserier <button id="stangSerier">✕</button></h2>
+    <div id="serieLista"></div>
+    <input id="nyNamn" placeholder="Namn (t.ex. Mammas nummer)">
+    <input id="nySiffror" placeholder="Siffror (t.ex. 0701234567)" inputmode="numeric">
+    <button class="stor" id="laggTill">Lägg till serie</button>
+  </div>
+</div>
+
+<div class="panel" id="ovaPanel">
+  <div class="inre">
+    <h2 id="ovaRubrik">Öva <button id="stangOva">✕</button></h2>
+    <div class="parlista" id="parLista"></div>
+    <button class="stor" id="testaFranOva">Testa mig</button>
+  </div>
+</div>
+
+<div class="panel" id="testPanel">
+  <div class="inre">
+    <h2 id="testRubrik">Testa <button id="stangTest">✕</button></h2>
+    <input id="testSvar" placeholder="Skriv siffrorna ur minnet" inputmode="numeric" autocomplete="off">
+    <button class="stor" id="rattaKnapp">Rätta</button>
+    <div id="testResultat"></div>
+  </div>
+</div>
+
+<div class="panel" id="rundaPanel">
+  <div class="inre">
+    <h2>Rundan klar <button id="stangRunda">✕</button></h2>
+    <div class="resultat" id="rundaResultat"></div>
+  </div>
+</div>
+
 <script src="kort.js"></script>
 <script>
   const kortEl = document.getElementById('kort');
   const nummerEl = document.getElementById('nummer');
-  const bakEl = document.getElementById('bak');
+  const bildytaEl = document.getElementById('bildyta');
   const altEl = document.getElementById('alternativ');
   const lageEl = document.getElementById('lage');
+  const klockaEl = document.getElementById('klocka');
 
   let index = parseInt(localStorage.getItem('sifferkort.index') || '0', 10);
   let slumpLage = false;
@@ -104,44 +196,51 @@
     else localStorage.setItem('sifferkort.fav.' + n, namn);
   }
 
+  // --- Statistik: per kort {r: antal ratt, f: antal fel, senast: tidsstampel}
+  function stat(n) {
+    try { return JSON.parse(localStorage.getItem('sifferkort.stat.' + n)) || { r: 0, f: 0 }; }
+    catch { return { r: 0, f: 0 }; }
+  }
+  function sparaStat(n, ratt) {
+    const s = stat(n);
+    if (ratt) s.r += 1; else s.f += 1;
+    s.senast = Date.now();
+    localStorage.setItem('sifferkort.stat.' + n, JSON.stringify(s));
+  }
+
+  function bildvag(n) { return 'bilder/' + String(n).padStart(2, '0') + '.png'; }
+
   function visa(i, { vand = false } = {}) {
-    // Vid kortbyte: hoppa till ratt sida UTAN animation, annars skymtar
-    // nya baksidan medan kortet snurrar tillbaka.
     kortEl.style.transition = 'none';
     kortEl.classList.toggle('vand', vand);
     void kortEl.offsetWidth;
     kortEl.style.transition = '';
     index = ((i % KORT.length) + KORT.length) % KORT.length;
-    // Forladda grannkortens bilder sa baksidan aldrig visas halvladdad.
+    localStorage.setItem('sifferkort.index', index);
     [index + 1, index - 1].forEach((j) => {
       const g = KORT[((j % KORT.length) + KORT.length) % KORT.length];
-      new Image().src = 'bilder/' + String(g.n).padStart(2, '0') + '.png';
+      new Image().src = bildvag(g.n);
     });
-    localStorage.setItem('sifferkort.index', index);
     const kort = KORT[index];
     nummerEl.textContent = kort.n;
-    const fil = 'bilder/' + String(kort.n).padStart(2, '0') + '.png';
     const visat = favorit(kort.n) || kort.namn;
-    bakEl.innerHTML = '';
+    bildytaEl.innerHTML = '';
     const img = new Image();
-    img.src = fil;
+    img.src = bildvag(kort.n);
     img.alt = visat;
-    img.onerror = () => {
-      bakEl.innerHTML = '<div class="saknas">Bild saknas för ' + kort.n + '</div>';
-    };
-    bakEl.appendChild(img);
+    img.onerror = () => { bildytaEl.innerHTML = '<div class="saknas">Bild saknas för ' + kort.n + '</div>'; };
+    bildytaEl.appendChild(img);
     const namnEl = document.createElement('div');
     namnEl.className = 'bildnamn';
     namnEl.textContent = visat;
-    bakEl.appendChild(namnEl);
+    bildytaEl.appendChild(namnEl);
     altEl.innerHTML = '';
     const val = [kort.namn, ...(kort.alt || [])];
     if (val.length > 1) {
       val.forEach((namn) => {
         const b = document.createElement('button');
         b.textContent = namn;
-        const aktiv = (favorit(kort.n) || kort.namn) === namn;
-        if (aktiv) b.classList.add('vald');
+        if ((favorit(kort.n) || kort.namn) === namn) b.classList.add('vald');
         b.addEventListener('click', (e) => {
           e.stopPropagation();
           sattFavorit(kort.n, namn === kort.namn ? null : namn);
@@ -155,16 +254,174 @@
   function nasta() { visa(slumpLage ? slump() : index + 1); }
   function forra() { visa(slumpLage ? slump() : index - 1); }
   function slump() {
-    let i;
-    do { i = Math.floor(Math.random() * KORT.length); } while (i === index);
-    return i;
+    // Viktad slump: kort du missat oftare kommer tillbaka oftare (spacing).
+    const vikter = KORT.map((k, i) => {
+      if (i === index) return 0;
+      const s = stat(k.n);
+      const missar = s.f - s.r;
+      return missar >= 2 ? 6 : missar >= 0 ? 3 : s.r >= 3 ? 1 : 2;
+    });
+    const total = vikter.reduce((a, b) => a + b, 0);
+    let lott = Math.random() * total;
+    for (let i = 0; i < vikter.length; i++) {
+      lott -= vikter[i];
+      if (lott <= 0) return i;
+    }
+    return (index + 1) % KORT.length;
   }
 
-  // Tryckrytm: framsida -> vand till bilden; baksida -> nasta kort.
+  // Tryckrytm: framsida -> vand till bilden. Pa baksidan svarar man med ✓/✕.
   kortEl.addEventListener('click', () => {
-    if (kortEl.classList.contains('vand')) nasta();
-    else kortEl.classList.add('vand');
+    if (!kortEl.classList.contains('vand')) kortEl.classList.add('vand');
   });
+
+  // --- Facit: gron = kunde, rod = kunde inte. Sparar statistik och gar vidare.
+  let runda = null; // {start, ratt, fel} nar tidtagning ar igang
+  function svara(ratt, e) {
+    e.stopPropagation();
+    sparaStat(KORT[index].n, ratt);
+    if (runda) { ratt ? runda.ratt++ : runda.fel++; }
+    nasta();
+  }
+  document.getElementById('ratt').addEventListener('click', (e) => svara(true, e));
+  document.getElementById('fel').addEventListener('click', (e) => svara(false, e));
+
+  // --- Tidtagning: tryck ⏱ for att starta en runda, tryck igen for resultat.
+  let klockTimer = null;
+  function fmt(ms) {
+    const s = Math.floor(ms / 1000);
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  }
+  klockaEl.addEventListener('click', () => {
+    if (!runda) {
+      runda = { start: Date.now(), ratt: 0, fel: 0 };
+      klockaEl.classList.add('igang');
+      klockTimer = setInterval(() => { klockaEl.textContent = fmt(Date.now() - runda.start); }, 1000);
+      klockaEl.textContent = '0:00';
+    } else {
+      clearInterval(klockTimer);
+      const tid = fmt(Date.now() - runda.start);
+      const antal = runda.ratt + runda.fel;
+      document.getElementById('rundaResultat').innerHTML =
+        '<div class="stort">' + tid + '</div>' +
+        antal + ' kort — <span class="gron">' + runda.ratt + ' ✓</span> · ' +
+        '<span class="rod">' + runda.fel + ' ✕</span>' +
+        (antal ? '<br>' + (tid && antal ? (((Date.now() - runda.start) / 1000 / antal).toFixed(1) + ' s/kort') : '') : '');
+      document.getElementById('rundaPanel').classList.add('oppen');
+      runda = null;
+      klockaEl.classList.remove('igang');
+      klockaEl.textContent = '⏱';
+    }
+  });
+  document.getElementById('stangRunda').addEventListener('click', () =>
+    document.getElementById('rundaPanel').classList.remove('oppen'));
+
+  // --- Sifferserier
+  function serier() {
+    try { return JSON.parse(localStorage.getItem('sifferkort.serier')) || []; }
+    catch { return []; }
+  }
+  function sparaSerier(s) { localStorage.setItem('sifferkort.serier', JSON.stringify(s)); }
+  function delaUpp(siffror) {
+    // Tva siffror i taget; udda slut ger en ensam sista siffra.
+    const par = [];
+    for (let i = 0; i < siffror.length; i += 2) par.push(siffror.slice(i, i + 2));
+    return par;
+  }
+  function ritaSerier() {
+    const lista = document.getElementById('serieLista');
+    lista.innerHTML = '';
+    serier().forEach((s, i) => {
+      const div = document.createElement('div');
+      div.className = 'serie';
+      div.innerHTML = '<div class="rad"><div><div class="namn"></div>' +
+        '<div class="siffror"></div></div><div class="knappar">' +
+        '<button class="ova">Öva</button><button class="testa">Testa</button>' +
+        '<button class="tabort">✕</button></div></div>';
+      div.querySelector('.namn').textContent = s.namn;
+      div.querySelector('.siffror').textContent = delaUpp(s.siffror).join(' ');
+      div.querySelector('.ova').addEventListener('click', () => oppnaOva(i));
+      div.querySelector('.testa').addEventListener('click', () => oppnaTest(i));
+      div.querySelector('.tabort').addEventListener('click', () => {
+        const alla = serier(); alla.splice(i, 1); sparaSerier(alla); ritaSerier();
+      });
+      lista.appendChild(div);
+    });
+  }
+  document.getElementById('serierKnapp').addEventListener('click', () => {
+    ritaSerier();
+    document.getElementById('seriePanel').classList.add('oppen');
+  });
+  document.getElementById('stangSerier').addEventListener('click', () =>
+    document.getElementById('seriePanel').classList.remove('oppen'));
+  document.getElementById('laggTill').addEventListener('click', () => {
+    const namn = document.getElementById('nyNamn').value.trim();
+    const siffror = document.getElementById('nySiffror').value.replace(/\D/g, '');
+    if (!namn || !siffror) return;
+    const alla = serier(); alla.push({ namn, siffror }); sparaSerier(alla);
+    document.getElementById('nyNamn').value = '';
+    document.getElementById('nySiffror').value = '';
+    ritaSerier();
+  });
+
+  let aktivSerie = null;
+  function oppnaOva(i) {
+    aktivSerie = i;
+    const s = serier()[i];
+    document.getElementById('ovaRubrik').firstChild.textContent = s.namn + ' ';
+    const lista = document.getElementById('parLista');
+    lista.innerHTML = '';
+    delaUpp(s.siffror).forEach((par) => {
+      const n = parseInt(par, 10);
+      const kort = KORT.find((k) => k.n === n);
+      const div = document.createElement('div');
+      div.className = 'par';
+      const namn = kort ? (favorit(n) || kort.namn) : '(ensam siffra ' + par + ')';
+      div.innerHTML = '<img alt=""><div class="parnr"></div><div class="parnamn"></div>';
+      div.querySelector('img').src = bildvag(n);
+      div.querySelector('.parnr').textContent = par;
+      div.querySelector('.parnamn').textContent = namn;
+      lista.appendChild(div);
+    });
+    document.getElementById('ovaPanel').classList.add('oppen');
+  }
+  document.getElementById('stangOva').addEventListener('click', () =>
+    document.getElementById('ovaPanel').classList.remove('oppen'));
+  document.getElementById('testaFranOva').addEventListener('click', () => {
+    document.getElementById('ovaPanel').classList.remove('oppen');
+    oppnaTest(aktivSerie);
+  });
+
+  function oppnaTest(i) {
+    aktivSerie = i;
+    const s = serier()[i];
+    document.getElementById('testRubrik').firstChild.textContent = s.namn + ' ';
+    document.getElementById('testSvar').value = '';
+    document.getElementById('testResultat').innerHTML = '';
+    document.getElementById('testPanel').classList.add('oppen');
+    document.getElementById('testSvar').focus();
+  }
+  document.getElementById('stangTest').addEventListener('click', () =>
+    document.getElementById('testPanel').classList.remove('oppen'));
+  document.getElementById('rattaKnapp').addEventListener('click', () => {
+    const s = serier()[aktivSerie];
+    const svar = document.getElementById('testSvar').value.replace(/\D/g, '');
+    const ok = svar === s.siffror;
+    const ut = document.getElementById('testResultat');
+    if (ok) {
+      ut.innerHTML = '<div class="resultat"><span class="stort gron">Rätt! ✓</span></div>';
+    } else {
+      let mark = '';
+      for (let i = 0; i < s.siffror.length; i++) {
+        const ratt = svar[i] === s.siffror[i];
+        mark += '<span class="' + (ratt ? 'gron' : 'rod') + '">' + s.siffror[i] + '</span>';
+      }
+      ut.innerHTML = '<div class="resultat"><span class="stort rod">Inte än ✕</span><br>' +
+        'Ditt svar: ' + (svar || '—') + '<br>Rätt: ' + mark + '</div>';
+    }
+  });
+
+  // --- Navigering
   document.getElementById('nasta').addEventListener('click', nasta);
   document.getElementById('forra').addEventListener('click', forra);
   document.getElementById('slumpa').addEventListener('click', () => {
@@ -172,6 +429,7 @@
     lageEl.textContent = slumpLage ? 'slump' : 'ordning';
     if (slumpLage) visa(slump());
   });
+  lageEl.addEventListener('click', () => document.getElementById('slumpa').click());
 
   let startX = null, startY = null;
   document.addEventListener('touchstart', (e) => {
@@ -179,6 +437,7 @@
   }, { passive: true });
   document.addEventListener('touchend', (e) => {
     if (startX === null) return;
+    if (document.querySelector('.panel.oppen')) { startX = null; return; }
     const dx = e.changedTouches[0].clientX - startX;
     const dy = e.changedTouches[0].clientY - startY;
     startX = null;
@@ -188,6 +447,7 @@
   }, { passive: true });
 
   document.addEventListener('keydown', (e) => {
+    if (document.querySelector('.panel.oppen')) return;
     if (e.key === 'ArrowRight') nasta();
     else if (e.key === 'ArrowLeft') forra();
     else if (e.key === ' ' || e.key === 'Enter') kortEl.classList.toggle('vand');
