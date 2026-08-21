@@ -31,8 +31,9 @@ per ruta nedan, klistra in koden och namnge det som rubriken säger.</p>
 <h2>1. Talet</h2>
 <p class="not">Namnge skriptet <b>Sifferkort tal</b></p>
 <pre id="k1">// Sifferkort — visar talet som galler just nu
+// Byter var 15:e minut, i takt med hur ofta iOS ritar om widgets.
 const d = new Date()
-const n = (d.getHours() * 60 + d.getMinutes()) % 100
+const n = (d.getHours() * 60 + Math.floor(d.getMinutes() / 15) * 15) % 100
 
 const w = new ListWidget()
 w.backgroundColor = new Color("#111318")
@@ -43,8 +44,8 @@ t.textColor = new Color("#f2f2f2")
 t.centerAlignText()
 w.addSpacer()
 
-// Tryck oppnar appen pa exakt det har kortet
-w.url = "https://forseliusanders.github.io/sifferkort/?tid"
+// Talet skickas med, sa appen visar exakt det kort widgeten visar
+w.url = "https://forseliusanders.github.io/sifferkort/?n=" + n
 w.refreshAfterDate = new Date(Date.now() + 60 * 1000)
 
 Script.setWidget(w)
@@ -54,8 +55,9 @@ Script.complete()</pre>
 <h2>2. Bilden</h2>
 <p class="not">Namnge skriptet <b>Sifferkort bild</b></p>
 <pre id="k2">// Sifferkort — visar bilden for samma tal
+// Samma 15-minutersformel som tal-skriptet.
 const d = new Date()
-const n = (d.getHours() * 60 + d.getMinutes()) % 100
+const n = (d.getHours() * 60 + Math.floor(d.getMinutes() / 15) * 15) % 100
 const nn = String(n).padStart(2, "0")
 const url = "https://forseliusanders.github.io/sifferkort/bilder/" + nn + ".png"
 
@@ -73,7 +75,7 @@ try {
   t.centerAlignText()
 }
 
-w.url = "https://forseliusanders.github.io/sifferkort/?tid"
+w.url = "https://forseliusanders.github.io/sifferkort/?n=" + n
 w.refreshAfterDate = new Date(Date.now() + 60 * 1000)
 
 Script.setWidget(w)
