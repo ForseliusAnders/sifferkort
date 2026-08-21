@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Timmens tal</title>
+<style>
+  html, body { height: 100%; margin: 0; background: #111318; color: #f2f2f2;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+  body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+  .tal { font-size: 34vw; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+  .under { color: #8a8f98; font-size: 15px; }
+  a { color: #4c8bf5; font-size: 15px; }
+</style>
+</head>
+<body>
+<div class="tal" id="tal">–</div>
+<div class="under" id="namn"></div>
+<a href="./?tid">Öppna kortet</a>
+<script src="kort.js"></script>
+<script>
+  // Samma formel som appen: timmar sedan epok * 37, modulo 100.
+  const timmar = Math.floor(Date.now() / 3600000);
+  const n = ((timmar * 37) % 100 + 100) % 100;
+  document.getElementById('tal').textContent = n;
+  const kort = KORT.find((k) => k.n === n);
+  document.getElementById('namn').textContent =
+    (localStorage.getItem('sifferkort.fav.' + n) || (kort && kort.namn) || '');
+</script>
+</body>
+</html>
