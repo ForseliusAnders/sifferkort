@@ -63,12 +63,11 @@ const url = "https://forseliusanders.github.io/sifferkort/bilder/" + nn + ".png"
 
 const w = new ListWidget()
 w.backgroundColor = new Color("#ffffff")
-w.setPadding(6, 6, 6, 6)
+w.setPadding(0, 0, 0, 0)
 try {
   const bild = await new Request(url).loadImage()
-  const b = w.addImage(bild)
-  b.applyFittingContentMode()
-  b.centerAlignImage()
+  // Bilden som widgetens bakgrund = fyller hela ytan utan vita kanter
+  w.backgroundImage = bild
 } catch (e) {
   const t = w.addText("Bild " + nn)
   t.textColor = new Color("#111318")
