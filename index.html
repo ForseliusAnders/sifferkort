@@ -159,12 +159,19 @@
   .bildkedja .lanknr { font-size: 15px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
   .bildkedja .lanknamn { font-size: 11px; color: #8a8f98; max-width: 96px; }
   .bildkedja.dolj .lanknr, .bildkedja.dolj .lanknamn { visibility: hidden; }
+  .uppslag { margin-top: 18px; text-align: center; }
+  .uppslag img {
+    width: 100%; max-height: 46vh; object-fit: contain; background: #fff;
+    border-radius: 18px;
+  }
+  .uppslag .uppnamn { font-size: 20px; font-weight: 600; margin-top: 10px; }
 </style>
 </head>
 <body>
 <header>
   <div class="titel">SIFFERKORT</div>
   <div class="hoger">
+    <button id="slaUppKnapp" aria-label="Slå upp ett tal">🔎</button>
     <button id="serierKnapp" aria-label="Sifferserier">123…</button>
     <button id="klocka" class="klocka" aria-label="Tidtagning">⏱</button>
     <button id="lage">ordning</button>
@@ -229,6 +236,15 @@
     <input id="testSvar" placeholder="Skriv siffrorna ur minnet" inputmode="numeric" autocomplete="off">
     <button class="stor" id="rattaKnapp">Rätta</button>
     <div id="testResultat"></div>
+  </div>
+</div>
+
+<div class="panel" id="slaUppPanel">
+  <div class="inre">
+    <h2>Vilket tal såg du? <button id="stangSlaUpp">✕</button></h2>
+    <div class="svarsfalt" id="slaUppFalt"></div>
+    <div class="numpad" id="slaUppPad"></div>
+    <div id="slaUppKort"></div>
   </div>
 </div>
 
@@ -624,6 +640,51 @@
     ritaKedja(false);
     document.getElementById('nedrakning').textContent = 'Din kedja:';
   }
+
+  // --- Sla upp: knappa in talet du sag pa lasskarmen, fa bilden direkt.
+  let slaUppSiffror = '';
+  function ritaSlaUpp() {
+    const falt = document.getElementById('slaUppFalt');
+    falt.innerHTML = '';
+    for (let i = 0; i < 2; i++) {
+      const d = document.createElement('div');
+      d.className = 'ruta' + (i === slaUppSiffror.length ? ' aktiv' : '');
+      d.textContent = slaUppSiffror[i] || '';
+      falt.appendChild(d);
+    }
+    const ut = document.getElementById('slaUppKort');
+    if (slaUppSiffror.length === 0) { ut.innerHTML = ''; return; }
+    const n = parseInt(slaUppSiffror, 10);
+    const kort = KORT.find((k) => k.n === n);
+    if (!kort) { ut.innerHTML = ''; return; }
+    ut.innerHTML = '<div class="uppslag"><img alt=""><div class="uppnamn"></div></div>';
+    ut.querySelector('img').src = bildvag(n);
+    ut.querySelector('.uppnamn').textContent = favorit(n) || kort.namn;
+  }
+  function oppnaSlaUpp() {
+    slaUppSiffror = '';
+    ritaSlaUpp();
+    document.getElementById('slaUppPanel').classList.add('oppen');
+  }
+  document.getElementById('slaUppKnapp').addEventListener('click', oppnaSlaUpp);
+  document.getElementById('stangSlaUpp').addEventListener('click', () =>
+    document.getElementById('slaUppPanel').classList.remove('oppen'));
+  (function byggSlaUppPad() {
+    const pad = document.getElementById('slaUppPad');
+    ['1','2','3','4','5','6','7','8','9','⌫','0','↻'].forEach((t) => {
+      const b = document.createElement('button');
+      b.textContent = t;
+      if (t === '⌫') b.className = 'backa';
+      if (t === '↻') b.className = 'klar';
+      b.addEventListener('click', () => {
+        if (t === '⌫') slaUppSiffror = slaUppSiffror.slice(0, -1);
+        else if (t === '↻') slaUppSiffror = '';
+        else if (slaUppSiffror.length < 2) slaUppSiffror += t;
+        ritaSlaUpp();
+      });
+      pad.appendChild(b);
+    });
+  })();
 
   document.getElementById('startSlump').addEventListener('click', startaSlump);
   document.getElementById('stangSlump').addEventListener('click', () => {
