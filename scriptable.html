@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Widgetskript</title>
+<style>
+  body { background: #111318; color: #f2f2f2; margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    padding: max(env(safe-area-inset-top), 20px) 16px 60px; line-height: 1.55; }
+  .inre { max-width: 620px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 6px; }
+  h2 { font-size: 17px; margin: 28px 0 8px; }
+  p, li { font-size: 15px; color: #c8ccd4; }
+  ol { padding-left: 20px; }
+  pre { background: #1c1f26; border: 1px solid #2a2e37; border-radius: 14px;
+    padding: 14px; overflow-x: auto; font-size: 12px; color: #e6e9ef;
+    -webkit-user-select: all; user-select: all; }
+  button { width: 100%; padding: 13px; margin-top: 8px; font-size: 15px;
+    border-radius: 12px; border: none; background: #24304a; color: #fff; }
+  button.klar { background: #2e9e5b; }
+  .not { color: #8a8f98; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="inre">
+<h1>Widgetskript för Scriptable</h1>
+<p>Installera <b>Scriptable</b> från App Store (gratis). Skapa ett nytt skript
+per ruta nedan, klistra in koden och namnge det som rubriken säger.</p>
+
+<h2>1. Talet</h2>
+<p class="not">Namnge skriptet <b>Sifferkort tal</b></p>
+<pre id="k1">// Sifferkort — visar talet som galler just nu
+const d = new Date()
+const n = (d.getHours() * 60 + d.getMinutes()) % 100
+
+const w = new ListWidget()
+w.backgroundColor = new Color("#111318")
+w.addSpacer()
+const t = w.addText(String(n))
+t.font = Font.boldSystemFont(64)
+t.textColor = new Color("#f2f2f2")
+t.centerAlignText()
+w.addSpacer()
+
+// Tryck oppnar appen pa exakt det har kortet
+w.url = "https://forseliusanders.github.io/sifferkort/?tid"
+w.refreshAfterDate = new Date(Date.now() + 60 * 1000)
+
+Script.setWidget(w)
+Script.complete()</pre>
+<button onclick="kopiera('k1', this)">Kopiera koden</button>
+
+<h2>2. Bilden</h2>
+<p class="not">Namnge skriptet <b>Sifferkort bild</b></p>
+<pre id="k2">// Sifferkort — visar bilden for samma tal
+const d = new Date()
+const n = (d.getHours() * 60 + d.getMinutes()) % 100
+const nn = String(n).padStart(2, "0")
+const url = "https://forseliusanders.github.io/sifferkort/bilder/" + nn + ".png"
+
+const w = new ListWidget()
+w.backgroundColor = new Color("#ffffff")
+w.setPadding(6, 6, 6, 6)
+try {
+  const bild = await new Request(url).loadImage()
+  const b = w.addImage(bild)
+  b.applyFittingContentMode()
+  b.centerAlignImage()
+} catch (e) {
+  const t = w.addText("Bild " + nn)
+  t.textColor = new Color("#111318")
+  t.centerAlignText()
+}
+
+w.url = "https://forseliusanders.github.io/sifferkort/?tid"
+w.refreshAfterDate = new Date(Date.now() + 60 * 1000)
+
+Script.setWidget(w)
+Script.complete()</pre>
+<button onclick="kopiera('k2', this)">Kopiera koden</button>
+
+<h2>Så lägger du ut dem</h2>
+<ol>
+  <li>Håll in på hemskärmen → <b>+</b> uppe till vänster → sök <b>Scriptable</b>.</li>
+  <li>Välj storlek <b>Medium</b> och lägg till.</li>
+  <li>Håll in den nya widgeten → <b>Redigera widget</b>.</li>
+  <li>Vid <b>Script</b>: välj <b>Sifferkort tal</b>. Vid <b>When Interacting</b>:
+      välj <b>Open URL</b> och klistra in
+      <span class="not">https://forseliusanders.github.io/sifferkort/?tid</span></li>
+  <li>Upprepa på nästa hemskärmssida med <b>Sifferkort bild</b>.</li>
+</ol>
+<p class="not">iOS bestämmer själv hur ofta widgets ritas om — oftast var
+15:e minut, inte varje minut. Talet och bilden räknas ur klockan, så de
+visar alltid samma kort som varandra och som appen.</p>
+</div>
+<script>
+  function kopiera(id, knapp) {
+    navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
+      knapp.textContent = 'Kopierat ✓';
+      knapp.className = 'klar';
+      setTimeout(() => { knapp.textContent = 'Kopiera koden'; knapp.className = ''; }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
