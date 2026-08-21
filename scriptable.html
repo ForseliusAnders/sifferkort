@@ -35,13 +35,21 @@ per ruta nedan, klistra in koden och namnge det som rubriken säger.</p>
 const d = new Date()
 const n = (d.getHours() * 60 + Math.floor(d.getMinutes() / 15) * 15) % 100
 
+// Anpassa storlek efter var widgeten sitter:
+// lasskarmens rutor ar sma, hemskarmens stora.
+const familj = (typeof config !== "undefined" && config.widgetFamily) || "medium"
+const lasskarm = familj.indexOf("accessory") === 0
+const storlek = lasskarm ? 30 : (familj === "small" ? 52 : 64)
+
 const w = new ListWidget()
-w.backgroundColor = new Color("#111318")
+if (!lasskarm) w.backgroundColor = new Color("#111318")
+w.setPadding(0, 0, 0, 0)
 w.addSpacer()
 const t = w.addText(String(n))
-t.font = Font.boldSystemFont(64)
-t.textColor = new Color("#f2f2f2")
+t.font = Font.boldSystemFont(storlek)
+if (!lasskarm) t.textColor = new Color("#f2f2f2")
 t.centerAlignText()
+t.minimumScaleFactor = 0.5
 w.addSpacer()
 
 // Talet skickas med, sa appen visar exakt det kort widgeten visar
