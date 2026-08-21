@@ -17,6 +17,8 @@
   const timmar = Math.floor(Date.now() / 3600000);
   const n = ((timmar * 37) % 100 + 100) % 100;
   document.getElementById('bild').src = 'bilder/' + String(n).padStart(2, '0') + '.png';
+  // Widgets laser om sidan sallan — byt sjalv nar timmen slar om.
+  setTimeout(() => location.reload(), (3600 - (Date.now() / 1000) % 3600 + 2) * 1000);
 </script>
 </body>
 </html>

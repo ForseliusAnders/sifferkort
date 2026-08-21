@@ -6,26 +6,27 @@
 <title>Timmens tal</title>
 <style>
   html, body { height: 100%; margin: 0; background: #111318; color: #f2f2f2;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
-  body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
-  .tal { font-size: 34vw; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
-  .under { color: #8a8f98; font-size: 15px; }
-  a { color: #4c8bf5; font-size: 15px; }
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  /* Fyller widgetytan oavsett storlek — siffran skalas med ytan. */
+  .tal { font-size: min(46vw, 62vh); font-weight: 800; line-height: 0.9;
+    font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  body.ljus { background: #fff; color: #111318; }
+  body.klar { background: transparent; }
 </style>
 </head>
 <body>
 <div class="tal" id="tal">–</div>
-<div class="under" id="namn"></div>
-<a href="./?tid">Öppna kortet</a>
-<script src="kort.js"></script>
 <script>
-  // Samma formel som appen: timmar sedan epok * 37, modulo 100.
+  // Samma formel overallt: timmar sedan epok * 37, modulo 100.
   const timmar = Math.floor(Date.now() / 3600000);
-  const n = ((timmar * 37) % 100 + 100) % 100;
-  document.getElementById('tal').textContent = n;
-  const kort = KORT.find((k) => k.n === n);
-  document.getElementById('namn').textContent =
-    (localStorage.getItem('sifferkort.fav.' + n) || (kort && kort.namn) || '');
+  document.getElementById('tal').textContent = ((timmar * 37) % 100 + 100) % 100;
+  // ?ljus = vit bakgrund, ?klar = genomskinlig (for widgets med egen bakgrund)
+  const f = new URLSearchParams(location.search);
+  if (f.has('ljus')) document.body.classList.add('ljus');
+  if (f.has('klar')) document.body.classList.add('klar');
+  // Widgets laser om sidan sallan — byt sjalv nar timmen slar om.
+  setTimeout(() => location.reload(), (3600 - (Date.now() / 1000) % 3600 + 2) * 1000);
 </script>
 </body>
 </html>
