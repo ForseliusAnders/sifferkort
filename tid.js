@@ -2,25 +2,21 @@
 // Alla ytor (appen, tal.html, bild.html) maste rakna likadant for att
 // widgeten och facit ska visa samma kort.
 //
-// STEG_MIN styr hur ofta talet byts. Andra har — inte pa varje sida.
-// 37 ar primtal mot 100, sa serien gar igenom alla 100 tal innan den
-// upprepar sig.
-var STEG_MIN = 1;
+// Formeln ar medvetet enkel sa den kan skrivas i Widgys formelsprak:
+//     (timme * 60 + minut) mod 100
+// Den byter varje minut och nar alla 100 tal under ett dygn.
+// Lokal tid anvands — samma klocka som telefonen visar.
 
-function aktuelltTal(nu, stegMin) {
-  var steg = (stegMin || STEG_MIN) * 60000;
-  var block = Math.floor((nu || Date.now()) / steg);
-  return ((block * 37) % 100 + 100) % 100;
+function aktuelltTal(nu) {
+  var d = nu ? new Date(nu) : new Date();
+  return (d.getHours() * 60 + d.getMinutes()) % 100;
 }
 
-// Millisekunder tills nasta byte, sa sidor kan ladda om sig sjalva i takt.
-function msTillNasta(stegMin) {
-  var steg = (stegMin || STEG_MIN) * 60000;
-  return steg - (Date.now() % steg) + 500;
+// Millisekunder till nasta minutskifte, sa sidor kan ladda om sig i takt.
+function msTillNasta() {
+  var d = new Date();
+  return (60 - d.getSeconds()) * 1000 - d.getMilliseconds() + 300;
 }
 
-// ?steg=1 i adressen ger en minut, ?steg=15 ger en kvart osv.
-function stegFranUrl() {
-  var v = parseInt(new URLSearchParams(location.search).get('steg'), 10);
-  return (v >= 1 && v <= 1440) ? v : STEG_MIN;
-}
+// Behalls for bakatkompatibilitet med ?steg= i gamla lankar.
+function stegFranUrl() { return 1; }

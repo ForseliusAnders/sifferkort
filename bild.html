@@ -15,16 +15,15 @@
 <img id="bild" alt="">
 <script src="tid.js"></script>
 <script>
-  var steg = stegFranUrl();
   function rita() {
-    var n = aktuelltTal(Date.now(), steg);
+    var n = aktuelltTal();
     document.getElementById('bild').src = 'bilder/' + String(n).padStart(2, '0') + '.png';
   }
   rita();
   setTimeout(function tick() {
     rita();
-    setTimeout(tick, msTillNasta(steg));
-  }, msTillNasta(steg));
+    setTimeout(tick, msTillNasta());
+  }, msTillNasta());
   if (new URLSearchParams(location.search).has('mork')) document.body.classList.add('mork');
 </script>
 </body>

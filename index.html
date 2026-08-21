@@ -793,7 +793,7 @@
     const n = parseInt(fraga.get('n'), 10);
     if (n >= 0 && n <= 99) startkort = KORT.findIndex((k) => k.n === n);
   } else if (fraga.has('tid')) {
-    startkort = KORT.findIndex((k) => k.n === aktuelltTal(Date.now(), stegFranUrl()));
+    startkort = KORT.findIndex((k) => k.n === aktuelltTal());
   }
   visa(startkort !== null && startkort >= 0 ? startkort : index);
 </script>
