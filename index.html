@@ -271,6 +271,7 @@
 </div>
 
 <script src="kort.js"></script>
+<script src="tid.js"></script>
 <script>
   const kortEl = document.getElementById('kort');
   const nummerEl = document.getElementById('nummer');
@@ -783,22 +784,16 @@
 
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 
-  // Timmens tal: samma formel som en widget kan rakna ut sjalv, sa bakgrunds-
-  // bild eller widget och appen alltid visar samma kort.
-  // ?n=47 oppnar ett bestamt kort, ?tid oppnar timmens kort.
-  function timmensTal(nu) {
-    const timmar = Math.floor((nu || Date.now()) / 3600000);
-    return ((timmar * 37) % 100 + 100) % 100;   // 37 ar primtal -> hela varvet
-  }
-  window.timmensTal = timmensTal;
-
+  // Aktuellt tal raknas i tid.js — samma formel som widgetsidorna anvander,
+  // sa widget och facit alltid visar samma kort.
+  // ?n=47 oppnar ett bestamt kort, ?tid oppnar det som galler just nu.
   const fraga = new URLSearchParams(location.search);
   let startkort = null;
   if (fraga.has('n')) {
     const n = parseInt(fraga.get('n'), 10);
     if (n >= 0 && n <= 99) startkort = KORT.findIndex((k) => k.n === n);
   } else if (fraga.has('tid')) {
-    startkort = KORT.findIndex((k) => k.n === timmensTal());
+    startkort = KORT.findIndex((k) => k.n === aktuelltTal(Date.now(), stegFranUrl()));
   }
   visa(startkort !== null && startkort >= 0 ? startkort : index);
 </script>

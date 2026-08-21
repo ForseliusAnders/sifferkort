@@ -3,22 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Timmens bild</title>
+<title>Aktuell bild</title>
 <style>
-  html, body { height: 100%; margin: 0; background: #fff; }
+  html, body { height: 100%; margin: 0; background: #fff; overflow: hidden; }
   body { display: flex; align-items: center; justify-content: center; }
   img { width: 100%; height: 100%; object-fit: contain; }
+  body.mork { background: #111318; }
 </style>
 </head>
 <body>
 <img id="bild" alt="">
+<script src="tid.js"></script>
 <script>
-  // Samma formel som appen och tal.html: timmar sedan epok * 37, modulo 100.
-  const timmar = Math.floor(Date.now() / 3600000);
-  const n = ((timmar * 37) % 100 + 100) % 100;
-  document.getElementById('bild').src = 'bilder/' + String(n).padStart(2, '0') + '.png';
-  // Widgets laser om sidan sallan — byt sjalv nar timmen slar om.
-  setTimeout(() => location.reload(), (3600 - (Date.now() / 1000) % 3600 + 2) * 1000);
+  var steg = stegFranUrl();
+  function rita() {
+    var n = aktuelltTal(Date.now(), steg);
+    document.getElementById('bild').src = 'bilder/' + String(n).padStart(2, '0') + '.png';
+  }
+  rita();
+  setTimeout(function tick() {
+    rita();
+    setTimeout(tick, msTillNasta(steg));
+  }, msTillNasta(steg));
+  if (new URLSearchParams(location.search).has('mork')) document.body.classList.add('mork');
 </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Timmens tal</title>
+<title>Aktuellt tal</title>
 <style>
   html, body { height: 100%; margin: 0; background: #111318; color: #f2f2f2;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
@@ -17,16 +17,21 @@
 </head>
 <body>
 <div class="tal" id="tal">–</div>
+<script src="tid.js"></script>
 <script>
-  // Samma formel overallt: timmar sedan epok * 37, modulo 100.
-  const timmar = Math.floor(Date.now() / 3600000);
-  document.getElementById('tal').textContent = ((timmar * 37) % 100 + 100) % 100;
-  // ?ljus = vit bakgrund, ?klar = genomskinlig (for widgets med egen bakgrund)
-  const f = new URLSearchParams(location.search);
+  var steg = stegFranUrl();
+  function rita() {
+    document.getElementById('tal').textContent = aktuelltTal(Date.now(), steg);
+  }
+  rita();
+  // Byt i takt aven om widgeten haller sidan oppen lange.
+  setTimeout(function tick() {
+    rita();
+    setTimeout(tick, msTillNasta(steg));
+  }, msTillNasta(steg));
+  var f = new URLSearchParams(location.search);
   if (f.has('ljus')) document.body.classList.add('ljus');
   if (f.has('klar')) document.body.classList.add('klar');
-  // Widgets laser om sidan sallan — byt sjalv nar timmen slar om.
-  setTimeout(() => location.reload(), (3600 - (Date.now() / 1000) % 3600 + 2) * 1000);
 </script>
 </body>
 </html>
