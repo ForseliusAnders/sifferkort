@@ -8,15 +8,13 @@ import urllib.error
 from generera_kort import generera
 
 KO = {
-    52: ('A wall calendar hanging open: a large spiral-bound calendar page '
-         'showing a full grid of numbered day squares, with a stack of '
-         'previous months curling behind it and a few days marked with red '
-         'circles. Clean and bold, instantly readable as a yearly wall '
-         'calendar.'),
-    72: ('A golfer in mid-swing on a green: crisp polo shirt, cap and glove, '
-         'club raised at the top of a powerful drive, a white golf ball on a '
-         'red tee in front of him with a small divot of grass flying. Bright '
-         'and dynamic, instantly readable as golf.'),
+    38: ('A tense border checkpoint between two countries: a long fence of '
+         'coiled barbed wire stretching across a bare strip of no-mans-land, '
+         'a striped red-and-white barrier pole lowered across the road, and '
+         'a small watchtower with a searchlight beside it. Two flagpoles '
+         'stand on either side of the line facing each other. Cold overcast '
+         'atmosphere, no soldiers or weapons visible — the divided border '
+         'line itself is the subject.'),
 }
 
 if __name__ == '__main__':

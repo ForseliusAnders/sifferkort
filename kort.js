@@ -39,7 +39,7 @@ const KORT = [
   { n: 35, namn: 'Film' },
   { n: 36, namn: 'Roulette' },
   { n: 37, namn: 'Sjuk med termometer' },
-  { n: 38, namn: 'Revolver .38' },
+  { n: 38, namn: '38:e parallellen' },
   { n: 39, namn: 'JAS 39 Gripen' },
   { n: 40, namn: 'Ali Baba & 40 rövare' },
   { n: 41, namn: 'Optimus Prime' },
